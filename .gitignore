@@ -36,6 +36,12 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# build artifacts (too large for git, regenerate via eas build)
+*.apk
+*.aab
+
 # generated native folders
 /ios
+/android
+
 /android

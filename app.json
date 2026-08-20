@@ -1,25 +1,64 @@
 {
   "expo": {
-    "name": "Expense_Tracker",
+    "name": "Expense Tracker",
     "slug": "Expense_Tracker",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.expensetracker.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow Expense Tracker to use your camera to attach receipt photos to transactions.",
+        "NSPhotoLibraryUsageDescription": "Allow Expense Tracker to access your photos to attach receipt images to transactions."
+      }
     },
     "android": {
+      "package": "com.expensetracker.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ],
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-secure-store",
+      "@react-native-community/datetimepicker",
+      "./plugins/withAllowBackupOverride",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Allow Expense Tracker to use your camera to attach receipt photos to transactions.",
+          "photosPermission": "Allow Expense Tracker to access your photos to attach receipt images to transactions."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF"
+        }
+      ]
+    ],
+    "extra": {
+      "apiBaseUrl": "http://192.168.29.193:4000",
+      "eas": {
+        "projectId": "2ba6cdbe-398f-4f08-9849-1de6ad185b0b"
+      }
+    },
+    "owner": "keerthana1726"
   }
 }

@@ -1,0 +1,27 @@
+diff --git a/node_modules/react-native-android-notification-listener/android/build.gradle b/node_modules/react-native-android-notification-listener/android/build.gradle
+index 1274a12..d76e619 100644
+--- a/node_modules/react-native-android-notification-listener/android/build.gradle
++++ b/node_modules/react-native-android-notification-listener/android/build.gradle
+@@ -1,16 +1,9 @@
+-buildscript {
+-
+-
+-  repositories {
+-      google()
+-      mavenCentral()
+-  }
+-
+-  dependencies {
+-    classpath 'com.android.tools.build:gradle:4.2.1'
+-    classpath 'com.google.code.gson:gson:2.8.6'
+-  }
+-}
++// Top-level build file where you can add configuration options common to all sub-projects/modules.
++// Original upstream buildscript block (declaring its own pinned Android Gradle Plugin 4.2.1)
++// removed here — a library module must not redeclare the Android Gradle Plugin classpath;
++// the root project's buildscript/plugin resolution already provides it, and this library's own
++// old AGP 4.2.1 pin conflicts with the modern AGP version this project actually builds with,
++// causing the Gradle build to fail. See README's Dependency Notes for the full writeup.
+ 
+ apply plugin: 'com.android.library'
+ 
