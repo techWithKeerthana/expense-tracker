@@ -6,6 +6,8 @@ import { RootStackParamList } from '../../navigation/types';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { Card } from '../../components/Card';
 import { EmptyState } from '../../components/EmptyState';
+import { ProgressBar } from '../../components/ProgressBar';
+import { SkeletonGroup } from '../../components/Skeleton';
 import { useTheme } from '../../context/ThemeContext';
 import { useGoals } from '../../context/GoalContext';
 import { computeGoalProgress, GoalStatus } from '../../utils/goalProgress';
@@ -51,20 +53,21 @@ export function GoalsScreen({ navigation }: Props) {
         </Pressable>
       </View>
 
-      <FlatList
-        data={goals}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          !isLoading ? (
+      {isLoading ? (
+        <SkeletonGroup rows={3} />
+      ) : (
+        <FlatList
+          data={goals}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
             <EmptyState
               icon="flag-outline"
               title="No goals yet"
               subtitle="Tap the + button to set your first savings goal — e.g. an emergency fund or a trip."
             />
-          ) : null
-        }
-        renderItem={({ item }) => {
+          }
+          renderItem={({ item }) => {
           const progress = computeGoalProgress(item);
           return (
             <Pressable onPress={() => navigation.navigate('AddEditGoal', { goalId: item.id })}>
@@ -86,13 +89,8 @@ export function GoalsScreen({ navigation }: Props) {
                   </Text>
                 </View>
 
-                <View style={[styles.progressTrack, { backgroundColor: colors.surfaceAlt }]}>
-                  <View
-                    style={[
-                      styles.progressFill,
-                      { width: `${progress.percent}%`, backgroundColor: statusColor(progress.status) },
-                    ]}
-                  />
+                <View style={{ marginBottom: spacing.sm }}>
+                  <ProgressBar progress={progress.percent / 100} color={statusColor(progress.status)} height={8} />
                 </View>
 
                 <View style={styles.goalFooter}>
@@ -111,8 +109,9 @@ export function GoalsScreen({ navigation }: Props) {
               </Card>
             </Pressable>
           );
-        }}
-      />
+          }}
+        />
+      )}
     </ScreenContainer>
   );
 }
@@ -158,16 +157,6 @@ const styles = StyleSheet.create({
   statusBadge: {
     fontSize: fontSize.xs,
     fontWeight: '700',
-  },
-  progressTrack: {
-    height: 8,
-    borderRadius: radius.pill,
-    overflow: 'hidden',
-    marginBottom: spacing.sm,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: radius.pill,
   },
   goalFooter: {
     flexDirection: 'row',

@@ -39,6 +39,7 @@ export type RootStackParamList = {
   AddGoalContribution: { goalId: string };
   HealthScore: undefined;
   WhatIfSimulator: undefined;
+  InsightsHub: undefined;
 };
 
 declare global {

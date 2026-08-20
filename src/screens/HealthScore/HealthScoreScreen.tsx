@@ -3,6 +3,8 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { Card } from '../../components/Card';
+import { ProgressBar } from '../../components/ProgressBar';
+import { SkeletonGroup } from '../../components/Skeleton';
 import { useTheme } from '../../context/ThemeContext';
 import { useTransactions } from '../../context/TransactionContext';
 import { useBudget } from '../../context/BudgetContext';
@@ -19,9 +21,10 @@ const BAND_LABELS: Record<HealthScoreBand, string> = {
 
 export function HealthScoreScreen() {
   const { colors } = useTheme();
-  const { transactions } = useTransactions();
-  const { budget } = useBudget();
-  const { goals } = useGoals();
+  const { transactions, isLoading: txLoading } = useTransactions();
+  const { budget, isLoading: budgetLoading } = useBudget();
+  const { goals, isLoading: goalsLoading } = useGoals();
+  const isLoading = txLoading || budgetLoading || goalsLoading;
   const result = computeHealthScore(transactions, budget, goals);
 
   const bandColor = (band: HealthScoreBand) => {
@@ -42,50 +45,49 @@ export function HealthScoreScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={[styles.title, { color: colors.text }]}>Financial Health Score</Text>
 
-        <Card style={[styles.scoreCard, { backgroundColor: bandColor(result.band) }]}>
-          <Text style={[styles.scoreValue, { color: colors.primaryText }]}>{result.score}</Text>
-          <Text style={[styles.scoreBand, { color: colors.primaryText }]}>{BAND_LABELS[result.band]}</Text>
-          <Text style={[styles.scoreOutOf, { color: colors.primaryText }]}>out of 100</Text>
-        </Card>
-
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>What's contributing to this score</Text>
-        {result.factors.length === 0 ? (
-          <Card style={styles.factorCard}>
-            <Text style={{ color: colors.textMuted, fontSize: fontSize.sm }}>
-              Add some transactions, a budget, or a savings goal to start seeing your health score breakdown.
-            </Text>
-          </Card>
+        {isLoading ? (
+          <SkeletonGroup rows={4} />
         ) : (
-          result.factors.map((factor) => (
-            <Card key={factor.key} style={styles.factorCard}>
-              <View style={styles.factorHeader}>
-                <Text style={[styles.factorLabel, { color: colors.text }]}>{factor.label}</Text>
-                <Text style={{ color: bandColor(factor.score >= 80 ? 'excellent' : factor.score >= 60 ? 'good' : factor.score >= 40 ? 'fair' : 'poor'), fontWeight: '700' }}>
-                  {Math.round(factor.score)}
+          <>
+            <Card style={[styles.scoreCard, { backgroundColor: bandColor(result.band) }]}>
+              <Text style={[styles.scoreValue, { color: colors.primaryText }]}>{result.score}</Text>
+              <Text style={[styles.scoreBand, { color: colors.primaryText }]}>{BAND_LABELS[result.band]}</Text>
+              <Text style={[styles.scoreOutOf, { color: colors.primaryText }]}>out of 100</Text>
+            </Card>
+
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>What's contributing to this score</Text>
+            {result.factors.length === 0 ? (
+              <Card style={styles.factorCard}>
+                <Text style={{ color: colors.textMuted, fontSize: fontSize.sm }}>
+                  Add some transactions, a budget, or a savings goal to start seeing your health score breakdown.
                 </Text>
-              </View>
-              <View style={[styles.factorTrack, { backgroundColor: colors.surfaceAlt }]}>
-                <View
-                  style={[
-                    styles.factorFill,
-                    { width: `${Math.round(factor.score)}%`, backgroundColor: colors.primary },
-                  ]}
-                />
-              </View>
-              <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, marginTop: spacing.xs }}>
-                {factor.detail}
+              </Card>
+            ) : (
+              result.factors.map((factor) => (
+                <Card key={factor.key} style={styles.factorCard}>
+                  <View style={styles.factorHeader}>
+                    <Text style={[styles.factorLabel, { color: colors.text }]}>{factor.label}</Text>
+                    <Text style={{ color: bandColor(factor.score >= 80 ? 'excellent' : factor.score >= 60 ? 'good' : factor.score >= 40 ? 'fair' : 'poor'), fontWeight: '700' }}>
+                      {Math.round(factor.score)}
+                    </Text>
+                  </View>
+                  <ProgressBar progress={factor.score / 100} gradient height={6} />
+                  <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, marginTop: spacing.xs }}>
+                    {factor.detail}
+                  </Text>
+                </Card>
+              ))
+            )}
+
+            <Card style={styles.disclaimerCard}>
+              <Ionicons name="information-circle-outline" size={16} color={colors.textMuted} />
+              <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, flex: 1 }}>
+                This score is a simple, rule-based estimate from your savings rate, budget usage, spending
+                consistency, and goal progress — not financial advice.
               </Text>
             </Card>
-          ))
+          </>
         )}
-
-        <Card style={styles.disclaimerCard}>
-          <Ionicons name="information-circle-outline" size={16} color={colors.textMuted} />
-          <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, flex: 1 }}>
-            This score is a simple, rule-based estimate from your savings rate, budget usage, spending
-            consistency, and goal progress — not financial advice.
-          </Text>
-        </Card>
       </ScrollView>
     </ScreenContainer>
   );
@@ -133,15 +135,6 @@ const styles = StyleSheet.create({
   factorLabel: {
     fontSize: fontSize.sm,
     fontWeight: '600',
-  },
-  factorTrack: {
-    height: 6,
-    borderRadius: radius.pill,
-    overflow: 'hidden',
-  },
-  factorFill: {
-    height: '100%',
-    borderRadius: radius.pill,
   },
   disclaimerCard: {
     flexDirection: 'row',

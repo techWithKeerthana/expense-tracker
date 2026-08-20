@@ -2,6 +2,7 @@ import React from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -9,13 +10,14 @@ import { RootStackParamList, MainTabParamList } from '../../navigation/types';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { Card } from '../../components/Card';
 import { EmptyState } from '../../components/EmptyState';
+import { SkeletonGroup } from '../../components/Skeleton';
 import { TransactionListItem } from '../../components/TransactionListItem';
 import { SyncStatusBadge } from '../../components/SyncStatusBadge';
 import { useTheme } from '../../context/ThemeContext';
 import { useTransactions } from '../../context/TransactionContext';
 import { computeTotals } from '../../utils/calculations';
 import { formatCurrency } from '../../utils/formatters';
-import { fontSize, radius, spacing } from '../../constants/theme';
+import { fontSize, gradients, radius, spacing } from '../../constants/theme';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Dashboard'>,
@@ -31,7 +33,7 @@ export function DashboardScreen({ navigation }: Props) {
   return (
     <ScreenContainer>
       <FlatList
-        data={recent}
+        data={isLoading ? [] : recent}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
@@ -52,26 +54,32 @@ export function DashboardScreen({ navigation }: Props) {
               </Pressable>
             </View>
 
-            <Card style={[styles.balanceCard, { backgroundColor: colors.primary }]}>
-              <Text style={[styles.balanceLabel, { color: colors.primaryText }]}>Total Balance</Text>
-              <Text style={[styles.balanceValue, { color: colors.primaryText }]}>
+            <Card style={[styles.balanceCard]}>
+              <LinearGradient
+                colors={gradients.primary}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFillObject}
+              />
+              <Text style={[styles.balanceLabel, { color: '#04120F' }]}>Total Balance</Text>
+              <Text style={[styles.balanceValue, { color: '#04120F' }]}>
                 {formatCurrency(totals.balance)}
               </Text>
               <View style={styles.balanceRow}>
                 <View style={styles.balanceItem}>
-                  <Ionicons name="arrow-down-circle" size={18} color={colors.primaryText} />
+                  <Ionicons name="arrow-down-circle" size={18} color="#04120F" />
                   <View>
-                    <Text style={[styles.balanceItemLabel, { color: colors.primaryText }]}>Income</Text>
-                    <Text style={[styles.balanceItemValue, { color: colors.primaryText }]}>
+                    <Text style={[styles.balanceItemLabel, { color: '#04120F' }]}>Income</Text>
+                    <Text style={[styles.balanceItemValue, { color: '#04120F' }]}>
                       {formatCurrency(totals.income)}
                     </Text>
                   </View>
                 </View>
                 <View style={styles.balanceItem}>
-                  <Ionicons name="arrow-up-circle" size={18} color={colors.primaryText} />
+                  <Ionicons name="arrow-up-circle" size={18} color="#04120F" />
                   <View>
-                    <Text style={[styles.balanceItemLabel, { color: colors.primaryText }]}>Expenses</Text>
-                    <Text style={[styles.balanceItemValue, { color: colors.primaryText }]}>
+                    <Text style={[styles.balanceItemLabel, { color: '#04120F' }]}>Expenses</Text>
+                    <Text style={[styles.balanceItemValue, { color: '#04120F' }]}>
                       {formatCurrency(totals.expense)}
                     </Text>
                   </View>
@@ -79,12 +87,33 @@ export function DashboardScreen({ navigation }: Props) {
               </View>
             </Card>
 
+            <Pressable onPress={() => navigation.navigate('InsightsHub')}>
+              <Card style={styles.insightsBanner}>
+                <LinearGradient
+                  colors={gradients.primary}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.insightsIconBadge}
+                >
+                  <Ionicons name="sparkles" size={20} color="#04120F" />
+                </LinearGradient>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.insightsTitle, { color: colors.text }]}>Insights & Tools</Text>
+                  <Text style={[styles.insightsSubtitle, { color: colors.textMuted }]}>
+                    AI Assistant, Goals, Health Score, What-If Simulator
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+              </Card>
+            </Pressable>
+
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Transactions</Text>
               <Pressable onPress={() => navigation.navigate('Main', { screen: 'Transactions' })}>
                 <Text style={[styles.seeAll, { color: colors.primary }]}>See all</Text>
               </Pressable>
             </View>
+            {isLoading ? <SkeletonGroup rows={3} /> : null}
           </View>
         }
         renderItem={({ item }) => (
@@ -129,8 +158,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   balanceCard: {
-    marginBottom: spacing.xl,
+    marginBottom: spacing.lg,
     borderWidth: 0,
+    overflow: 'hidden',
+  },
+  insightsBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginBottom: spacing.xl,
+  },
+  insightsIconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  insightsTitle: {
+    fontSize: fontSize.md,
+    fontWeight: '700',
+  },
+  insightsSubtitle: {
+    fontSize: fontSize.xs,
+    marginTop: 2,
   },
   balanceLabel: {
     fontSize: fontSize.sm,

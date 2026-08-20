@@ -54,30 +54,6 @@ export function SettingsScreen({ navigation }: Props) {
 
       <Card style={styles.section}>
         <MenuRow
-          icon="chatbubble-ellipses-outline"
-          label="AI Financial Assistant"
-          onPress={() => navigation.navigate('AiAssistant')}
-        />
-        <MenuRow
-          icon="flag-outline"
-          label="Financial Goals"
-          onPress={() => navigation.navigate('Goals')}
-        />
-        <MenuRow
-          icon="pulse-outline"
-          label="Financial Health Score"
-          onPress={() => navigation.navigate('HealthScore')}
-        />
-        <MenuRow
-          icon="git-branch-outline"
-          label="What-If Simulator"
-          onPress={() => navigation.navigate('WhatIfSimulator')}
-          isLast
-        />
-      </Card>
-
-      <Card style={styles.section}>
-        <MenuRow
           icon="color-palette-outline"
           label="Appearance"
           onPress={() => navigation.navigate('Appearance')}

@@ -21,6 +21,7 @@ import { AddEditGoalScreen } from '../screens/Goals/AddEditGoalScreen';
 import { AddGoalContributionScreen } from '../screens/Goals/AddGoalContributionScreen';
 import { HealthScoreScreen } from '../screens/HealthScore/HealthScoreScreen';
 import { WhatIfSimulatorScreen } from '../screens/WhatIfSimulator/WhatIfSimulatorScreen';
+import { InsightsHubScreen } from '../screens/Insights/InsightsHubScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -34,6 +35,7 @@ export function RootNavigator() {
         headerTintColor: colors.text,
         headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.background },
+        animation: 'slide_from_right',
       }}
     >
       <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
@@ -71,6 +73,7 @@ export function RootNavigator() {
       />
       <Stack.Screen name="HealthScore" component={HealthScoreScreen} options={{ title: 'Financial Health Score' }} />
       <Stack.Screen name="WhatIfSimulator" component={WhatIfSimulatorScreen} options={{ title: 'What-If Simulator' }} />
+      <Stack.Screen name="InsightsHub" component={InsightsHubScreen} options={{ title: 'Insights & Tools' }} />
     </Stack.Navigator>
   );
 }
