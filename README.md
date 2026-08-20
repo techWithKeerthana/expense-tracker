@@ -37,13 +37,18 @@ A full-featured personal finance tracker built with **React Native**, designed a
 > duplicate/mismatched `expo-font` version (`@expo/vector-icons`'s peer dependency resolved to
 > `57.0.1` instead of deduping to the correct SDK54 `14.0.12` from `expo` itself), fixed via a
 > `package.json` `overrides` entry, confirmed with a clean reinstall + `tsc`/`expo export`, then a
-> real successful EAS rebuild redistributed via Firebase — **the app now opens past the crash**.
-> **Login itself is still expected to fail** on this build for testers off the developer's LAN,
-> since `apiBaseUrl` is a private LAN IP baked in at build time — deploying the backend publicly
-> (Render/Railway free tier) is the next open task. See the Build Log's last two rows and
-> [Build & Deployment](#-build--deployment) for the tester link. Keep this whole section updated at
-> the end of every work session so it always reflects true current state. Full details below; don't
-> guess — re-verify anything stale before relying on it.
+> real successful EAS rebuild redistributed via Firebase — **the app now opened past the crash, but
+> login still failed** since `apiBaseUrl` was a private LAN IP. **The backend is now deployed
+> publicly on Render's free tier** (`https://expense-tracker-6v8l.onrender.com`, backed by a free
+> MongoDB Atlas cluster) — verified with a real register→login round trip against the live database,
+> not just a health check. Two real Render deploy-config bugs were found and fixed along the way
+> (wrong Root Directory, then a stale Start Command path) — see the Build Log's "Backend deployment"
+> row. `apiBaseUrl` now points at the live Render URL, a new `preview` APK was built and
+> redistributed via Firebase (same tester link). **This is the current, most up-to-date build** —
+> login should now work from any network. See [Build & Deployment](#-build--deployment) for the live
+> backend URL and tester link. Keep this whole section updated at the end of every work session so
+> it always reflects true current state. Full details below; don't guess — re-verify anything stale
+> before relying on it.
 
 ### Build log (phase by phase, with real verification status)
 
@@ -64,14 +69,14 @@ A full-featured personal finance tracker built with **React Native**, designed a
 | Phase 4 — Financial Goals Planner | Manually-funded goals (name, icon, target amount/date, saved amount) reusing the Phase 1 backend `Goal` model/`/api/goals` endpoints — new `goalStorage`/`GoalContext` (mirrors `TransactionContext`), wired into `syncService`/`SyncContext`. New `src/utils/goalProgress.ts` (percent/remaining/on-track-or-behind status, pure + unit-tested). Screens: `GoalsScreen` (list+progress bars), `AddEditGoalScreen` (create/edit), `AddGoalContributionScreen` (add funds) — all reachable from Settings → Financial Goals. | ✅ **Unit-tested (6/6) + `tsc`/bundle-export clean + device-tested and confirmed working.** |
 | Phase 5 — Financial Health Score | Rule-based 0–100 score from 4 weighted, independently-explainable factors (savings rate, budget adherence, spending consistency via coefficient-of-variation across recent months, goal progress) via new `src/utils/healthScore.ts` — factors with insufficient data (e.g. no budget set, no goals) are cleanly excluded and remaining weights renormalized, rather than guessed. New `HealthScoreScreen` (score card + per-factor breakdown), reachable from Settings. | ✅ **Unit-tested (7/7) + `tsc`/bundle-export clean + device-tested and confirmed working.** |
 | Phase 6 — What-If Simulator | Pure client-side projection (no new context/storage) — new `src/utils/whatIfSimulator.ts` recomputes this month's totals with a hypothetical single-category spend adjustment (%) and/or extra monthly income applied, reusing `calculations.ts`/`goalProgress.ts`; reports projected balance/budget-usage/goal-ETA changes. New `WhatIfSimulatorScreen` (live-recomputing form + results), reachable from Settings. Nothing is ever persisted. | ✅ **Unit-tested (8/8) + `tsc`/bundle-export clean + device-tested and confirmed working.** |
-| **Recruiter-ready build** | Standalone `preview`-profile APK (self-contained, JS bundle baked in — no Metro/laptop dependency, unlike the `development` profile) | ✅ **Built successfully and distributed via Firebase App Distribution.** Tester install link: [appdistribution.firebase.google.com/testerapps/...](https://appdistribution.firebase.google.com/testerapps/1:370095400849:android:0d82571df794f85efd9c30/releases/0sreh49frbpko?utm_source=firebase-tools) — routes installation through the trusted "Firebase App Tester" app instead of a raw sideloaded APK, avoiding the aggressive Play Protect block that blocked direct installs from the raw `expo.dev` build link on some devices. See [Build & Deployment](#-build--deployment) for details. |
-| Startup crash bug (`expo-font` duplicate) | Real bug found after distributing the first Firebase build: app crashed immediately on open (before the login screen rendered) on the tester's physical device | ✅ **Root-caused via real `adb logcat` (not guessed) and fixed.** Crash was `FATAL EXCEPTION`/`NoSuchMethodError: getDirectConverter` inside `expo-font`'s native `FontLoaderModule` at startup. Root cause: `npm ls` showed **two different `expo-font` versions** in the dependency tree — the correct SDK54 version (`14.0.12`, from `expo` itself) and a mismatched duplicate (`57.0.1`) pulled in via `@expo/vector-icons`'s peer dependency, which Android's native autolinking picked instead, linking incompatible native Kotlin code. Fixed with a `package.json` `overrides` entry pinning `expo-font` to `14.0.12` (same pattern as the existing notification-listener override), confirmed deduped via `npm ls`, verified with a clean reinstall + `tsc --noEmit` + `expo export --platform android`, then confirmed by a real successful EAS `preview` rebuild redistributed via Firebase App Distribution. The app's private-LAN-IP `apiBaseUrl` (see Known Limitations) is a separate, still-open issue — it will make login itself fail for anyone off the developer's LAN, but no longer crashes the app on open. |
+| **Recruiter-ready build** | Standalone `preview`-profile APK (self-contained, JS bundle baked in — no Metro/laptop dependency, unlike the `development` profile) | ✅ **Built successfully and distributed via Firebase App Distribution.** Tester install link: [appdistribution.firebase.google.com/testerapps/...](https://appdistribution.firebase.google.com/testerapps/1:370095400849:android:0d82571df794f85efd9c30/releases/47bj3uigk5q38?utm_source=firebase-tools) — routes installation through the trusted "Firebase App Tester" app instead of a raw sideloaded APK, avoiding the aggressive Play Protect block that blocked direct installs from the raw `expo.dev` build link on some devices. See [Build & Deployment](#-build--deployment) for details. |
+| Startup crash bug (`expo-font` duplicate) | Real bug found after distributing the first Firebase build: app crashed immediately on open (before the login screen rendered) on the tester's physical device | ✅ **Root-caused via real `adb logcat` (not guessed) and fixed.** Crash was `FATAL EXCEPTION`/`NoSuchMethodError: getDirectConverter` inside `expo-font`'s native `FontLoaderModule` at startup. Root cause: `npm ls` showed **two different `expo-font` versions** in the dependency tree — the correct SDK54 version (`14.0.12`, from `expo` itself) and a mismatched duplicate (`57.0.1`) pulled in via `@expo/vector-icons`'s peer dependency, which Android's native autolinking picked instead, linking incompatible native Kotlin code. Fixed with a `package.json` `overrides` entry pinning `expo-font` to `14.0.12` (same pattern as the existing notification-listener override), confirmed deduped via `npm ls`, verified with a clean reinstall + `tsc --noEmit` + `expo export --platform android`, then confirmed by a real successful EAS `preview` rebuild redistributed via Firebase App Distribution. Login itself still failed on this build (LAN-IP backend, separate issue) — fixed next. |
+| Backend deployment (Render) | The app's `apiBaseUrl` pointed at a private LAN IP, so login/sync only worked on the developer's own Wi-Fi — unusable for a recruiter testing off-network | ✅ **Backend deployed live to Render's free tier** (`https://expense-tracker-6v8l.onrender.com`), backed by a free MongoDB Atlas M0 cluster. Root-caused two real deploy failures along the way (not guessed): (1) Render's Root Directory wasn't scoped to `server/`, so it tried to run the frontend's `index.ts` and hit an unrelated `expo` Node type-stripping error; (2) after fixing that, the Start Command still referenced a stale/incorrect path (`server/index.ts`, which doesn't exist) instead of `npm start` → `node src/index.js`. Verified end-to-end with a real register→login round trip against the live database (not just a `/health` check). `apiBaseUrl` updated in `app.json`, `preview` APK rebuilt and redistributed via Firebase App Distribution (same tester link). Code pushed to a new GitHub repo ([techWithKeerthana/expense-tracker](https://github.com/techWithKeerthana/expense-tracker)) so Render could deploy from it. |
 
 > **All 6 phases are code-complete (45/45 unit tests passing, `tsc`/bundle-export clean), the EAS
-> dev-client build succeeds, and the combined device-testing pass is COMPLETE with no remaining
-> bugs** (one real bug — Delete Transaction sync/tombstone — was found and fixed during this pass).
-> **A recruiter-ready standalone `preview`-profile APK has been built and distributed via Firebase
-> App Distribution** — see the row directly above for the tester install link.
+> dev-client build succeeds, the combined device-testing pass is COMPLETE with no remaining bugs,
+> and the backend is now live on the public internet** (not just a LAN IP) — see the last two Build
+> Log rows above for the tester link and the live backend URL.
 
 ### Tech stack & architecture decisions
 - **Expo SDK 54** (downgraded from 57 for Expo Go compatibility) + **expo-dev-client** (custom dev build required — Expo Go alone cannot load the Android notification listener native module used by Phase 2).
@@ -96,13 +101,16 @@ npm run dev:memory         # ephemeral in-memory MongoDB, zero setup, prints "Se
 # 2. Frontend — from the repo root, in a separate terminal
 npx expo start --dev-client
 ```
-- **Current `apiBaseUrl`:** `http://192.168.29.193:4000`, configured in [app.json](app.json) →
-  `expo.extra.apiBaseUrl`, read by [src/services/apiClient.ts](src/services/apiClient.ts).
-- **This LAN IP can change** (DHCP) after a router restart or reboot of the dev machine — if login
-  ever stops connecting again, re-check the current IP with `ipconfig` (look for "IPv4 Address" on
-  the Wi-Fi adapter) and update `apiBaseUrl`. No app rebuild is required for this — it's a JS-level
-  config value delivered via the Metro dev manifest, so just reload the app (shake → Reload) or
-  restart `npx expo start --dev-client`.
+- **Current `apiBaseUrl`:** `https://expense-tracker-6v8l.onrender.com` (a live, publicly-reachable
+  backend deployed on Render's free tier), configured in [app.json](app.json) →
+  `expo.extra.apiBaseUrl`, read by [src/services/apiClient.ts](src/services/apiClient.ts). This
+  works from anywhere with internet access — no LAN/dev-machine dependency anymore. Note: Render's
+  free tier spins the service down after ~15 min of inactivity and takes ~30–60s to wake on the next
+  request — the app's "Sync Status" badge will show `syncing`/`offline` briefly during that cold
+  start, which is expected. For fully local development instead (e.g. offline-capable iteration
+  without waiting on Render), point `apiBaseUrl` at your dev machine's LAN IP and run the backend
+  locally via `npm run dev:memory` as shown above — just remember to switch it back before building
+  a release APK.
 - **The backend does not start automatically** with the Expo dev client — `npm run dev:memory` (or
   `npm run dev`) must be run manually every time you want to test login/sync locally.
 - First time only, build the dev client: `npm install -g eas-cli && eas login && eas build --profile development --platform android`.
@@ -151,16 +159,13 @@ npx expo start --dev-client
   the SDK54-correct version (`14.0.12`). See the Build Log row above. Worth re-checking with
   `npm ls expo-font` after any future dependency upgrade, since `npx expo install --check` alone did
   **not** catch this (it only checks top-level version pins, not duplicate/un-deduped nested copies).
-- **The current `apiBaseUrl` is a private LAN IP (`http://192.168.29.193:4000`), baked into the build
-  at `eas build` time** — this only works for devices on the same Wi-Fi network as the developer's
-  machine, with the backend running. It is **not** a public URL, so login will fail for any tester
-  off that LAN (this is separate from, and was not the cause of, the startup crash bug above). Fix:
-  deploy the backend to Render/Railway (free tier) and point `apiBaseUrl` at that public URL —
-  tracked as the next open task, see [server/README.md](server/README.md#deploying-to-render-free-tier).
-- **Login/sync over a local network requires manual IP management** — see "Exact commands" above.
-  The physical-device login fix is applied and **confirmed working end-to-end by the user** on a real
-  Android phone. This LAN IP is still DHCP-assigned though, so it can change after a router
-  restart/reboot — re-check with `ipconfig` if login ever stops connecting again.
+- **The backend is now deployed publicly on Render's free tier** (`https://expense-tracker-6v8l.onrender.com`)
+  — `apiBaseUrl` no longer points at a private LAN IP, so login/sync works from any network, not just
+  the developer's own Wi-Fi. Verified via a real register→login round trip against the live MongoDB
+  Atlas-backed database (not just a health check). The only caveat: Render's free tier spins the
+  service down after ~15 min of inactivity, causing a ~30–60s cold-start delay on the next request
+  (the "Sync Status" badge will briefly show `syncing`/`offline`) — expected on the free tier, not a
+  bug. See [Build & Deployment](#-build--deployment) for the live URL and redeploy instructions.
 - Camera receipt capture, native `Alert.alert` confirmation dialogs, and the native date picker are
   **code-reviewed only, not device-tested** (no Android emulator/physical device was available during
   initial development) — see the full disclosure in [Assumptions & Limitations](#assumptions--limitations).
@@ -634,16 +639,25 @@ resolution.
 
 ## 📦 Build & Deployment
 
-### Latest recruiter-ready build
-**Tester install link (Firebase App Distribution):** https://appdistribution.firebase.google.com/testerapps/1:370095400849:android:0d82571df794f85efd9c30/releases/0sreh49frbpko?utm_source=firebase-tools
+### Live backend
+**Public URL:** https://expense-tracker-6v8l.onrender.com — deployed on Render's free tier, backed by
+a free MongoDB Atlas M0 cluster. Health check: `GET /health` → `{"status":"ok"}`. Verified with a
+real register→login round trip against the live database (not just the health check). Repo deployed
+from: [github.com/techWithKeerthana/expense-tracker](https://github.com/techWithKeerthana/expense-tracker)
+(Render's Root Directory is set to `server`, Build Command `npm install`, Start Command `npm start`).
 
-This is a standalone `preview`-profile APK (see below) — built after all 6 phases passed the
-combined device-testing pass with no remaining bugs, then uploaded to **Firebase App Distribution**
-and shared with a tester (`keerthanamgowda05@gmail.com`). **This is the second distributed build** —
-the first one crashed immediately on open due to a duplicate `expo-font` version; see the "Startup
-crash bug" row in the Build Log for the root cause and fix. **Login itself is still expected to fail**
-on this build for anyone off the developer's LAN, since `apiBaseUrl` is still a private LAN IP — see
-Known Limitations; deploying the backend publicly is the next open task.
+> **Cold starts:** Render's free tier spins the service down after ~15 min of inactivity and takes
+> ~30–60s to wake on the next request — the app's "Sync Status" badge will briefly show
+> `syncing`/`offline` during that window. This is expected on the free tier, not a bug.
+
+### Latest recruiter-ready build
+**Tester install link (Firebase App Distribution):** https://appdistribution.firebase.google.com/testerapps/1:370095400849:android:0d82571df794f85efd9c30/releases/47bj3uigk5q38?utm_source=firebase-tools
+
+This is a standalone `preview`-profile APK (see below), now configured with `apiBaseUrl` pointing at
+the **live public Render backend** above (no longer a private LAN IP), uploaded to **Firebase App
+Distribution** and shared with a tester (`keerthanamgowda05@gmail.com`). **This is the third
+distributed build** — the first crashed on open (`expo-font` duplicate, fixed), the second opened
+fine but login failed (LAN-IP backend, now fixed). Login/sync should now work from any network.
 
 > **Why Firebase App Distribution instead of the raw `expo.dev` build link:** installing a raw
 > sideloaded APK directly (e.g. via the `expo.dev` build page) triggers an aggressive Google Play

@@ -54,7 +54,7 @@
       ]
     ],
     "extra": {
-      "apiBaseUrl": "http://192.168.29.193:4000",
+      "apiBaseUrl": "https://expense-tracker-6v8l.onrender.com",
       "eas": {
         "projectId": "2ba6cdbe-398f-4f08-9849-1de6ad185b0b"
       }

@@ -115,3 +115,17 @@ are **not** synced since they aren't portable off the device.
 Free-tier Render services spin down after inactivity and take ~30–60s to wake on
 the next request — the app's "Sync Status" indicator will show `syncing`/`offline`
 during that cold start, which is expected on the free tier.
+
+**Deployed and verified live:** https://expense-tracker-6v8l.onrender.com (register→login round
+trip confirmed against the real MongoDB Atlas database, not just `/health`).
+
+### Real gotchas hit during this deployment (both config-only, no code changes needed)
+1. **Root Directory not actually applied** — if the deploy log shows an error about `expo`/`.ts`
+   type-stripping (e.g. `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING` on a file under
+   `node_modules/expo/...`), Render is running from the **repo root** (the frontend project), not
+   `server/`. Re-check the service's Root Directory field is exactly `server` and redeploy.
+2. **Stale Start Command path after fixing #1** — if you see `Cannot find module
+   '.../server/index.ts'`, the Start Command field has a leftover/wrong path (there is no
+   `server/index.ts` — the real entry is `server/src/index.js`, plain CommonJS, no TypeScript, no
+   build step). Once Root Directory is correctly `server`, the Start Command should just be
+   `npm start` (no `server/` prefix) — Render already `cd`s into the Root Directory first.
