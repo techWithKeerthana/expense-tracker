@@ -11,6 +11,7 @@ import { AccountProvider } from './src/context/AccountContext';
 import { SyncProvider } from './src/context/SyncContext';
 import { SmartImportProvider } from './src/context/SmartImportContext';
 import { RootNavigator } from './src/navigation/RootNavigator';
+import { navigationRef } from './src/navigation/navigationRef';
 
 function AppShell() {
   const { colors, isDark } = useTheme();
@@ -28,7 +29,7 @@ function AppShell() {
   };
 
   return (
-    <NavigationContainer theme={navigationTheme}>
+    <NavigationContainer ref={navigationRef} theme={navigationTheme}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <RootNavigator />
     </NavigationContainer>

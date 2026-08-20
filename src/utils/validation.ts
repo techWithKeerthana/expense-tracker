@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CATEGORIES } from '../constants/categories';
+import { isPasswordStrong, PASSWORD_REQUIREMENTS_MESSAGE } from './passwordStrength';
 
 export const transactionSchema = z.object({
   title: z
@@ -25,7 +26,7 @@ export type TransactionFormValues = z.infer<typeof transactionSchema>;
 export const registerSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(80, 'Name must be under 80 characters'),
   email: z.string().trim().min(1, 'Email is required').email('Enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password: z.string().refine(isPasswordStrong, PASSWORD_REQUIREMENTS_MESSAGE),
 });
 
 export type RegisterFormValues = z.infer<typeof registerSchema>;

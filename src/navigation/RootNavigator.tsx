@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
+import { navigationRef } from './navigationRef';
 import { MainTabNavigator } from './MainTabNavigator';
 import { useTheme } from '../context/ThemeContext';
+import { useAccount } from '../context/AccountContext';
 import { SplashScreen } from '../screens/Splash/SplashScreen';
 import { LoginScreen } from '../screens/Auth/LoginScreen';
 import { RegisterScreen } from '../screens/Auth/RegisterScreen';
@@ -27,6 +29,21 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
   const { colors } = useTheme();
+  const { isAuthenticated, isLoading } = useAccount();
+  const wasAuthenticated = useRef(isAuthenticated);
+
+  useEffect(() => {
+    // Splash's one-time redirect only fires at launch — logging out later
+    // (from deep inside Settings) needs its own reactive redirect, since
+    // clearing AccountContext state alone doesn't make any mounted screen
+    // navigate away on its own. Only reacts to a real true -> false
+    // transition (an explicit logout), not the initial unauthenticated state
+    // before the stored session is restored.
+    if (!isLoading && wasAuthenticated.current && !isAuthenticated && navigationRef.isReady()) {
+      navigationRef.reset({ index: 0, routes: [{ name: 'Login' }] });
+    }
+    wasAuthenticated.current = isAuthenticated;
+  }, [isAuthenticated, isLoading]);
 
   return (
     <Stack.Navigator

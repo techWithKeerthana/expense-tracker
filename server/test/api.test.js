@@ -57,11 +57,21 @@ test('rejects registration with weak password', async () => {
   assert.equal(status, 400);
 });
 
+test('rejects registration with a password missing required character classes', async () => {
+  const { status, body } = await request('POST', '/api/auth/register', {
+    name: 'Test User',
+    email: 'weak2@example.com',
+    password: 'alllowercase1', // no uppercase, no special character
+  });
+  assert.equal(status, 400);
+  assert.match(body.message, /uppercase|special/);
+});
+
 test('registers, logs in, and fetches profile', async () => {
   const reg = await request('POST', '/api/auth/register', {
     name: 'Ada Lovelace',
     email: 'ada@example.com',
-    password: 'supersecret1',
+    password: 'Supersecret1!',
   });
   assert.equal(reg.status, 201);
   assert.ok(reg.body.token);
@@ -70,7 +80,7 @@ test('registers, logs in, and fetches profile', async () => {
 
   const login = await request('POST', '/api/auth/login', {
     email: 'ada@example.com',
-    password: 'supersecret1',
+    password: 'Supersecret1!',
   });
   assert.equal(login.status, 200);
   assert.ok(login.body.token);
@@ -84,7 +94,7 @@ test('rejects duplicate email registration', async () => {
   const { status } = await request('POST', '/api/auth/register', {
     name: 'Duplicate',
     email: 'ada@example.com',
-    password: 'supersecret1',
+    password: 'Supersecret1!',
   });
   assert.equal(status, 409);
 });
@@ -106,12 +116,12 @@ test('syncs transactions and scopes them per user', async () => {
   const userA = await request('POST', '/api/auth/register', {
     name: 'User A',
     email: 'a@example.com',
-    password: 'passwordA1',
+    password: 'PasswordA1!',
   });
   const userB = await request('POST', '/api/auth/register', {
     name: 'User B',
     email: 'b@example.com',
-    password: 'passwordB1',
+    password: 'PasswordB1!',
   });
 
   const sync = await request(
@@ -146,7 +156,7 @@ test('last-write-wins: older update is ignored, newer update applies', async () 
   const user = await request('POST', '/api/auth/register', {
     name: 'LWW User',
     email: 'lww@example.com',
-    password: 'passwordLWW1',
+    password: 'PasswordLWW1!',
   });
   const token = user.body.token;
 
@@ -216,7 +226,7 @@ test('budget sync upserts and returns authoritative document', async () => {
   const user = await request('POST', '/api/auth/register', {
     name: 'Budget User',
     email: 'budget@example.com',
-    password: 'passwordBudget1',
+    password: 'PasswordBudget1!',
   });
   const token = user.body.token;
 

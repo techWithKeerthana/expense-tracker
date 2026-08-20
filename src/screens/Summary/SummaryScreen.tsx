@@ -1,6 +1,7 @@
 import React from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, FlatList, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { PieChart } from 'react-native-chart-kit';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { Card } from '../../components/Card';
 import { EmptyState } from '../../components/EmptyState';
@@ -11,11 +12,29 @@ import { formatCurrency } from '../../utils/formatters';
 import { CATEGORY_COLORS, CATEGORY_ICONS } from '../../constants/categories';
 import { fontSize, radius, spacing } from '../../constants/theme';
 
+const screenWidth = Dimensions.get('window').width - spacing.lg * 2 - spacing.lg * 2;
+
 export function SummaryScreen() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { transactions } = useTransactions();
   const totals = computeTotals(transactions);
   const breakdown = computeCategoryBreakdown(transactions, 'expense');
+
+  const chartConfig = {
+    backgroundGradientFrom: colors.card,
+    backgroundGradientTo: colors.card,
+    color: (opacity = 1) => (isDark ? `rgba(255,255,255,${opacity})` : `rgba(26,29,41,${opacity})`),
+    labelColor: (opacity = 1) => (isDark ? `rgba(255,255,255,${opacity})` : `rgba(26,29,41,${opacity})`),
+    decimalPlaces: 0,
+  };
+
+  const pieData = breakdown.map((item) => ({
+    name: item.category,
+    population: item.total,
+    color: CATEGORY_COLORS[item.category],
+    legendFontColor: colors.textSecondary,
+    legendFontSize: 12,
+  }));
 
   return (
     <ScreenContainer>
@@ -49,6 +68,19 @@ export function SummaryScreen() {
             </View>
 
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Expense by Category</Text>
+            {pieData.length > 0 && (
+              <Card style={styles.chartCard}>
+                <PieChart
+                  data={pieData}
+                  width={screenWidth}
+                  height={200}
+                  chartConfig={chartConfig}
+                  accessor="population"
+                  backgroundColor="transparent"
+                  paddingLeft="8"
+                />
+              </Card>
+            )}
           </View>
         }
         renderItem={({ item }) => {
@@ -107,6 +139,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: spacing.md,
     marginBottom: spacing.md,
+  },
+  chartCard: {
+    marginBottom: spacing.lg,
   },
   categoryRow: {
     flexDirection: 'row',

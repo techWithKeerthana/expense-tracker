@@ -22,7 +22,17 @@ router.post(
   [
     body('name').trim().isLength({ min: 1, max: 80 }).withMessage('Name is required'),
     body('email').isEmail().withMessage('A valid email is required').normalizeEmail(),
-    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+    body('password')
+      .isLength({ min: 8 })
+      .withMessage('Password must be at least 8 characters')
+      .matches(/[A-Z]/)
+      .withMessage('Password must include an uppercase letter')
+      .matches(/[a-z]/)
+      .withMessage('Password must include a lowercase letter')
+      .matches(/[0-9]/)
+      .withMessage('Password must include a number')
+      .matches(/[^A-Za-z0-9]/)
+      .withMessage('Password must include a special character'),
   ],
   validate,
   register

@@ -8,6 +8,7 @@ import { RootStackParamList } from '../../navigation/types';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { InputField } from '../../components/InputField';
 import { Button } from '../../components/Button';
+import { PasswordStrengthChecklist } from '../../components/PasswordStrengthChecklist';
 import { useTheme } from '../../context/ThemeContext';
 import { useAccount } from '../../context/AccountContext';
 import { registerSchema, RegisterFormValues } from '../../utils/validation';
@@ -24,11 +25,13 @@ export function RegisterScreen({ navigation }: Props) {
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: { name: '', email: '', password: '' },
   });
+  const password = watch('password');
 
   const onSubmit = async (values: RegisterFormValues) => {
     setSubmitting(true);
@@ -79,7 +82,7 @@ export function RegisterScreen({ navigation }: Props) {
           render={({ field: { value, onChange } }) => (
             <InputField
               label="Password"
-              placeholder="At least 8 characters"
+              placeholder="Create a strong password"
               secureTextEntry
               value={value}
               onChangeText={onChange}
@@ -87,6 +90,7 @@ export function RegisterScreen({ navigation }: Props) {
             />
           )}
         />
+        <PasswordStrengthChecklist password={password} />
 
         {serverError ? <Text style={[styles.serverError, { color: colors.danger }]}>{serverError}</Text> : null}
 
