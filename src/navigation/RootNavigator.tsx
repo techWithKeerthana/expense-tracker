@@ -59,8 +59,16 @@ export function RootNavigator() {
       <Stack.Screen name="Appearance" component={AppearanceScreen} options={{ title: 'Appearance' }} />
       <Stack.Screen name="ExportImport" component={ExportImportScreen} options={{ title: 'Export & Backup' }} />
       <Stack.Screen name="SmartImport" component={SmartImportScreen} options={{ title: 'Smart Import' }} />
-      <Stack.Screen name="AiAssistant" component={AiAssistantScreen} options={{ title: 'AI Financial Assistant' }} />
-      <Stack.Screen name="Goals" component={GoalsScreen} options={{ title: 'Financial Goals' }} />
+      <Stack.Screen
+        name="AiAssistant"
+        component={AiAssistantScreen}
+        options={{ title: 'AI Financial Assistant', animation: 'fade_from_bottom' }}
+      />
+      <Stack.Screen
+        name="Goals"
+        component={GoalsScreen}
+        options={{ title: 'Financial Goals', animation: 'fade_from_bottom' }}
+      />
       <Stack.Screen
         name="AddEditGoal"
         component={AddEditGoalScreen}
@@ -71,9 +79,21 @@ export function RootNavigator() {
         component={AddGoalContributionScreen}
         options={{ title: 'Add Funds', presentation: 'modal' }}
       />
-      <Stack.Screen name="HealthScore" component={HealthScoreScreen} options={{ title: 'Financial Health Score' }} />
-      <Stack.Screen name="WhatIfSimulator" component={WhatIfSimulatorScreen} options={{ title: 'What-If Simulator' }} />
-      <Stack.Screen name="InsightsHub" component={InsightsHubScreen} options={{ title: 'Insights & Tools' }} />
+      <Stack.Screen
+        name="HealthScore"
+        component={HealthScoreScreen}
+        options={{ title: 'Financial Health Score', animation: 'fade_from_bottom' }}
+      />
+      <Stack.Screen
+        name="WhatIfSimulator"
+        component={WhatIfSimulatorScreen}
+        options={{ title: 'What-If Simulator', animation: 'fade_from_bottom' }}
+      />
+      <Stack.Screen
+        name="InsightsHub"
+        component={InsightsHubScreen}
+        options={{ title: 'Insights & Tools', animation: 'fade_from_bottom' }}
+      />
     </Stack.Navigator>
   );
 }

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useColorScheme } from 'react-native';
+import * as SystemUI from 'expo-system-ui';
 import { ThemeMode } from '../types';
 import { ThemeColors, darkColors, lightColors } from '../constants/theme';
 import { themeStorage } from '../storage/themeStorage';
@@ -28,6 +29,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const isDark = mode === 'system' ? systemScheme === 'dark' : mode === 'dark';
   const colors = isDark ? darkColors : lightColors;
+
+  useEffect(() => {
+    // Matches the native Android window background to the current theme so it
+    // doesn't flash white behind screen transitions. Guarded because this
+    // native module may not be linked yet in an existing dev-client build —
+    // must not crash the app if it's missing.
+    try {
+      SystemUI.setBackgroundColorAsync(colors.background).catch(() => {});
+    } catch {
+      // Native module not linked in this build — safe to ignore.
+    }
+  }, [colors.background]);
 
   const setMode = async (next: ThemeMode) => {
     setModeState(next);
