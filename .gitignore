@@ -40,6 +40,9 @@ yarn-error.*
 *.apk
 *.aab
 
+# scratch documents dropped in repo root for chat/attachment purposes
+*.pdf
+
 # generated native folders
 /ios
 /android
